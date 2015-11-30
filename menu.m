@@ -1,4 +1,4 @@
-function []= kebab()
+function []= menu()
 
 resolution = 1000; %resolution de la courbe BSpline
 K = 0;            %variable d'état
