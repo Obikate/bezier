@@ -3,7 +3,6 @@ function[courbe_bezier, courbe_focale] = tracer_courbe(matrice_pk, matrice_mk, r
    alpha = 0.2;
    %longueur d'un sous-intervalle
    long_k = floor(resolution/length(matrice_pk));
-   %courbure = zeros(1, long_k*t);
    for k = 1:(length(matrice_pk) - 1)
        %on calcule la courbe de bézier intermédiaire
        for t = 1:long_k 
@@ -28,11 +27,4 @@ function[courbe_bezier, courbe_focale] = tracer_courbe(matrice_pk, matrice_mk, r
            n = [-f_prim_t_y; f_prim_t_x];
            courbe_focale(:, (k-1)*long_k + t) = courbe_bezier(:, (k - 1)*long_k + t) + alpha*courbure((k - 1)*long_k + t) * n;
        end;
-   end; 
-
-   %on trace la courbure dans une deuxième fenêtre
-   subplot(1, 2, 2);
-   plot(courbure);
-   subplot(1, 2, 1);
-  % plot(courbe_focale(1, :), courbe_focale(2, :));
-   %subplot(1, 2, 1);
+   end;
