@@ -10,10 +10,32 @@ clear ids_pk;  %on utilise des ensembles d'IDs pour avoir des points
 clear ids_mk;  %drag&drop
 clear current_plot;  %pour facilement effacer un plot
 choice = 0; %si oui ou non on trace la courbe focale
+matrice_mk = 0;
 
 while K ~= 5
     %on crée le menu
-    K = menu('Menu de malade', 'donner les points de contrôle - Catmull-Rom splines', 'donner les points de contrôle - cardinal splines','saisir m0 et mN à la souris', 'Kochanek-Bartels splines','arrêter');
+    if (K == 4)
+        K = menu('Modification des paramètres de Kochanek-Bartels', 'Oui', 'Non');
+        if (K == 1)
+            K = 6;
+            for i=1:length(matrice_pk)
+                delete(ids_mk(i));
+            end;
+            ids_mk = initDerivate(matrice_pk, 0);
+            matrice_mk = ids_to_coord(ids_mk);  %on recupère les coordonnées des mk
+            [courbe_bezier, courbe_focale] = tracer_courbe(matrice_pk, matrice_mk, resolution, degre); %et on peut tracer
+            delete(current_plot);
+            if (choice == 1)
+                current_plot = plot(courbe_bezier(1, :), courbe_bezier(2, :), 'r', courbe_focale(1, :), courbe_focale(2, :), 'b'); %la courbe de Bézier
+            else
+                current_plot = plot(courbe_bezier(1, :), courbe_bezier(2, :), 'r');
+            end;
+        else
+            K = 0;
+        end;
+    else
+        K = menu('Menu de malade', 'donner les points de contrôle - Catmull-Rom splines', 'donner les points de contrôle - cardinal splines','saisir m0 et mN à la souris', 'Kochanek-Bartels splines','arrêter');
+    end;
     
     if (((K == 1) || (K == 2)) || (K == 3)||(K == 4))   %on ajoute les P_i        
         %paramètrage de la fenêtre
@@ -64,8 +86,13 @@ while K ~= 5
             if (choice == 1)
                 delete(current_plot);
                 current_plot = plot(courbe_bezier(1, :), courbe_bezier(2, :), 'r', courbe_focale(1, :), courbe_focale(2, :), 'b'); %la courbe de Bézier
+            else
+                choice = 0;
             end;
         end;
+    end;
+    if (K == 6) 
+        K = 4;
     end;
 end;    
 close;  
@@ -84,16 +111,17 @@ end
 %fonction d'initialisation des mk et des IDs des mk
 function[ids_mk] = initDerivate(matrice_pk, tension)
     clear ids_mk;
-    matrice_mk = 0;
     dim = size(matrice_pk);
-    if (K ~= 4)
+    if ((K ~= 4) && (K ~= 6))
         for i = 1:(length(matrice_pk) - 1)
             matrice_mk(1, i) = (1 - tension) * (matrice_pk(1, i+1) - matrice_pk(1, i)); %calcul selon le modèle naïf
             matrice_mk(2, i) = (1 - tension) * (matrice_pk(2, i+1) - matrice_pk(2, i));
         end;        
     else %Kochanek-Bartels spline
-        matrice_mk(1, 1) = 0;
-        matrice_mk(2, 1) = 0;
+        if (K ~= 6)
+            matrice_mk(1, 1) = 0;
+            matrice_mk(2, 1) = 0;
+        end;
 
         options_double = [-2; -2; -2];
         while (((options_double(1) < -1) || (options_double(1) > 1) || (options_double(2) < -1) ||(options_double(2) > 1) ||(options_double(3) < -1) || (options_double(3) > 1)) || (sum(isnan(options_double)) ~= 0)) 
@@ -104,16 +132,17 @@ function[ids_mk] = initDerivate(matrice_pk, tension)
         bia = options_double(2);
         con = options_double(3);
         
-        h = menu('Choisissez un m0 svp', 'Ok');
-        [x, y] = ginput(1);
-        matrice_mk(1, 1) = x;
-        matrice_mk(2, 1) = y;
+        if (K ~= 6)
+            h = menu('Choisissez un m0 svp', 'Ok');
+            [x, y] = ginput(1);
+            matrice_mk(1, 1) = x;
+            matrice_mk(2, 1) = y;
+        end;
+        
         if (dim(2) > 2)
             i = 2;
             %calcul des tangentes au milieu
-            disp(length(matrice_pk));
             while (i < length(matrice_pk) - 1) 
-                disp(i);
                 matrice_mk(:, i) = ((1-ten)*(1+bia)*(1+con))/2*(matrice_pk(:, i) - matrice_pk(:, i-1)) + ((1-ten)*(1-bia)*(1-con))/2*(matrice_pk(:, i+1) - matrice_pk(:, i));
                 matrice_mk(:, i+1) = ((1-ten)*(1+bia)*(1-con))/2*(matrice_pk(:, i+1) - matrice_pk(:, i)) + ((1-ten)*(1-bia)*(1-con))/2*(matrice_pk(:, i+2) - matrice_pk(:, i+1));
                 i = i + 2;
@@ -124,10 +153,12 @@ function[ids_mk] = initDerivate(matrice_pk, tension)
             end;
         end;
         
-        h = menu('Choisissez un mN svp', 'Ok');
-        [x, y] = ginput(1);
-        matrice_mk(1, length(matrice_pk)) = x;
-        matrice_mk(2, length(matrice_pk)) = y;
+        if (K ~= 6) 
+            h = menu('Choisissez un mN svp', 'Ok');
+            [x, y] = ginput(1);
+            matrice_mk(1, length(matrice_pk)) = x;
+            matrice_mk(2, length(matrice_pk)) = y;
+        end;
     end;
     
     if (K == 3) %saisie de mN, m0 avec la souris
@@ -139,7 +170,7 @@ function[ids_mk] = initDerivate(matrice_pk, tension)
         [x, y] = ginput(1);
         matrice_mk(1, length(matrice_pk)) = x;
         matrice_mk(2, length(matrice_pk)) = y;
-    elseif (K ~= 4)
+    elseif ((K ~= 4) && (K ~= 6))
         if (length(matrice_pk) > 2) %pour le dernier mk, on fait la moyenne des deux mk précédents, sauf s'il n'y a que 2 points en tout    
             matrice_mk(:, length(matrice_pk)) = 0.5*matrice_mk(:, (length(matrice_pk) - 1)) + 0.5*matrice_mk(:, (length(matrice_pk) - 2));
         else
