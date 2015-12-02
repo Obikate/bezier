@@ -1,6 +1,6 @@
 function []= interface()
 
-resolution = 100; %resolution de la courbe BSpline
+resolution = 500; %resolution de la courbe BSpline
 K = 0;            %variable d'état
 matrice_pk = 0;      %P_i, points de contrôle
 matrice_mk = 0;
@@ -72,13 +72,13 @@ while K ~= 5
                 prompt = 'Entrez la valeur du paramètre de tension svp. Entre 0 et 1 ';
                 %c = input(prompt);
                 c = str2double(inputdlg(prompt));
-                while (((c <= 0) || (c > 1)) || (isnan(c) ~= 0))  %on vérifie que c est bon
+                while (((c < 0) || (c > 1)) || (isnan(c) ~= 0))  %on vérifie que c est bon
                     c = str2double(inputdlg(prompt));
                 end;
                 ids_mk = initDerivate(matrice_pk, c);
             end;
 
-            matrice_mk = ids_to_coord(ids_mk);  %on recupère les coordonnées des mk
+            matrice_mk = ids_to_coord_mk(ids_pk, ids_mk);  %on recupère les coordonnées des mk
             [courbe_bezier, courbe_focale] = tracer_courbe(matrice_pk, matrice_mk, resolution, degre); %et on peut tracer
             current_plot = plot(courbe_bezier(1, :), courbe_bezier(2, :), 'r');
 
@@ -99,7 +99,7 @@ close;
 %fonction de relachement des points "draggables"
 function update(pos)
         matrice_pk = ids_to_coord(ids_pk);
-        matrice_mk = ids_to_coord(ids_mk);
+        matrice_mk = ids_to_coord_mk(ids_pk, ids_mk);
         [courbe_bezier, courbe_focale] = tracer_courbe(matrice_pk, matrice_mk, resolution, degre);
         delete(current_plot);
         if (choice == 1)
@@ -135,8 +135,8 @@ function[ids_mk] = initDerivate(matrice_pk, tension)
         if (K ~= 6)
             h = menu('Choisissez un m0 svp', 'Ok');
             [x, y] = ginput(1);
-            matrice_mk(1, 1) = x;
-            matrice_mk(2, 1) = y;
+            matrice_mk(1, 1) = x - matrice_pk(1, 1);
+            matrice_mk(2, 1) = y - matrice_pk(2, 1);
         end;
         
         if (dim(2) > 2)
@@ -156,20 +156,20 @@ function[ids_mk] = initDerivate(matrice_pk, tension)
         if (K ~= 6) 
             h = menu('Choisissez un mN svp', 'Ok');
             [x, y] = ginput(1);
-            matrice_mk(1, length(matrice_pk)) = x;
-            matrice_mk(2, length(matrice_pk)) = y;
+            matrice_mk(1, length(matrice_pk)) = x - matrice_pk(1, length(matrice_pk));
+            matrice_mk(2, length(matrice_pk)) = y - matrice_pk(2, length(matrice_pk));
         end;
     end;
     
     if (K == 3) %saisie de mN, m0 avec la souris
         h = menu('Choisissez un m0 svp', 'Ok');
         [x, y] = ginput(1);
-        matrice_mk(1, 1) = x;
-        matrice_mk(2, 1) = y;
+        matrice_mk(1, 1) = x - matrice_pk(1, 1);
+        matrice_mk(2, 1) = y - matrice_pk(2, 1);
         h = menu('Choisissez un mN svp', 'Ok');
         [x, y] = ginput(1);
-        matrice_mk(1, length(matrice_pk)) = x;
-        matrice_mk(2, length(matrice_pk)) = y;
+        matrice_mk(1, length(matrice_pk)) = x - matrice_pk(1, length(matrice_pk));
+        matrice_mk(2, length(matrice_pk)) = y - matrice_pk(2, length(matrice_pk));
     elseif ((K ~= 4) && (K ~= 6))
         if (length(matrice_pk) > 2) %pour le dernier mk, on fait la moyenne des deux mk précédents, sauf s'il n'y a que 2 points en tout    
             matrice_mk(:, length(matrice_pk)) = 0.5*matrice_mk(:, (length(matrice_pk) - 1)) + 0.5*matrice_mk(:, (length(matrice_pk) - 2));
@@ -180,7 +180,8 @@ function[ids_mk] = initDerivate(matrice_pk, tension)
     
     %et on s'occupe du vecteur ids_mk
     for i = 1:length(matrice_mk) %on procède comme pour les IDs des pk
-        ids_mk(i) = impoint(gca, matrice_mk(1, i), matrice_mk(2, i));
+%        ids_mk(i) = impoint(gca, matrice_mk(1, i), matrice_mk(2, i));
+        ids_mk(i) = impoint(gca, matrice_mk(1, i) + matrice_pk(1, i), matrice_mk(2, i) + matrice_pk(2, i));
         addNewPositionCallback(ids_mk(i), @update);
     end
 end
