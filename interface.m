@@ -1,3 +1,4 @@
+%% 
 function []= interface()
 
 resolution = 100; %resolution de la courbe BSpline
@@ -79,7 +80,8 @@ while K ~= 5
             end;
 
             matrice_mk = ids_to_coord(ids_mk);  %on recupère les coordonnées des mk
-            [courbe_bezier, courbe_focale] = tracer_courbe(matrice_pk, matrice_mk, resolution, degre); %et on peut tracer
+            %[courbe_bezier, courbe_focale] = tracer_courbe(matrice_pk, matrice_mk, resolution, degre); %et on peut tracer
+            courbe_bezier = tracer_lagrange(matrice_pk, resolution);
             current_plot = plot(courbe_bezier(1, :), courbe_bezier(2, :), 'r');
 
             choice = menu('Tracé de la courbe focale?', 'Oui', 'Non');
