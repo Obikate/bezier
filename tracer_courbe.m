@@ -15,7 +15,6 @@ function[courbe_bezier, courbe_focale] = tracer_courbe(matrice_pk, matrice_mk, r
            %calcul de la courbe de bézier
            courbe_bezier(1, (k - 1)*long_k + t) = casteljau(mat_int(1, :), t/long_k, degre + 1, 1);
            courbe_bezier(2, (k - 1)*long_k + t) = casteljau(mat_int(2, :), t/long_k, degre + 1, 1);
-
            %calcul de la courbure
            f_prim_t_x = f_prim(mat_int(1, 1), mat_int(1, 2), mat_int(1, 3), mat_int(1, 4), t/long_k);
            f_prim_t_y = f_prim(mat_int(2, 1), mat_int(2, 2), mat_int(2, 3), mat_int(2, 4), t/long_k);
