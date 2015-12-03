@@ -18,11 +18,11 @@ while K ~= 6
         K = menu('Modification des paramètres de Kochanek-Bartels', 'Oui', 'Non');
         if (K == 1)
             K = 7;
-            for i=1:length(matrice_pk)
+            for i=2:(length(matrice_pk)-1)
                 delete(ids_mk(i));
             end;
             ids_mk = initDerivate(matrice_pk, 0);
-            matrice_mk = ids_to_coord(ids_mk);  %on recupère les coordonnées des mk
+            matrice_mk = ids_to_coord_mk(ids_pk, ids_mk);  %on recupère les coordonnées des mk
             [courbe_bezier, courbe_focale] = tracer_courbe(matrice_pk, matrice_mk, resolution, degre); %et on peut tracer
             delete(current_plot);
             if (choice == 1)
@@ -65,7 +65,7 @@ while K ~= 6
         dim = size(matrice_pk);
         %on veut la tracer que si on a >= 2 points
         if ((dim(2) > 1) && (K ~=5))
-            if ((K == 1) || (K == 4)) %Catmull-Rom splines
+            if ((K == 1) || (K == 4)) %Catmull-Rom splines ou TBC splines
                 ids_mk = initDerivate(matrice_pk, 0);  %on initialise les IDs des mk
             else  %cardinal splines
                 prompt = 'Entrez la valeur du paramètre de tension svp. Entre 0 et 1 ';
@@ -101,16 +101,13 @@ while K ~= 6
                 matrice_pk(1, length(matrice_pk) + 1) = x;
                 matrice_pk(2, length(matrice_pk)) = y;
                 ids_pk(length(matrice_pk)) = impoint(gca, x, y);
-                disp('un point');
                 %chaque point "draggable" dispose d'une fonction qu'il appelle lorsqu'il a une nouvelle position
                 addNewPositionCallback(ids_pk(length(matrice_pk)), @update);
                 %on retrace la courbe
-                disp('après ajout');
                 courbe_lagrange = tracer_lagrange(matrice_pk, resolution);
                 delete(current_plot);
                 current_plot = plot(courbe_lagrange(1, :), courbe_lagrange(2, :), 'r');
                 %on donne la possibilité de rajouter un point
-                disp('ici');
                 add_point = menu('rajouter un point', 'oui', 'non');
             end;
         end;
@@ -209,9 +206,9 @@ function[ids_mk] = initDerivate(matrice_pk, tension)
     end;
     
     %et on s'occupe du vecteur ids_mk
-    for i = 1:length(matrice_mk) %on procède comme pour les IDs des pk
-        ids_mk(i) = impoint(gca, matrice_mk(1, i) + matrice_pk(1, i), matrice_mk(2, i) + matrice_pk(2, i));
-        addNewPositionCallback(ids_mk(i), @update);
-    end
+        for i = 1:length(matrice_mk) %on procède comme pour les IDs des pk
+            ids_mk(i) = impoint(gca, matrice_mk(1, i) + matrice_pk(1, i), matrice_mk(2, i) + matrice_pk(2, i));
+            addNewPositionCallback(ids_mk(i), @update);
+        end  
 end
 end
