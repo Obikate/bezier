@@ -1,6 +1,6 @@
 function []= interface()
 
-resolution = 500; %resolution de la courbe BSpline
+resolution = 300; %resolution de la courbe BSpline
 K = 0;            %variable d'état
 matrice_pk = 0;      %P_i, points de contrôle
 matrice_mk = 0;
