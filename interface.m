@@ -10,7 +10,6 @@ clear ids_pk;  %on utilise des ensembles d'IDs pour avoir des points
 clear ids_mk;  %drag&drop
 clear current_plot;  %pour facilement effacer un plot
 choice = 0; %si oui ou non on trace la courbe focale
-matrice_mk = 0;
 
 while K ~= 6
     %on crée le menu
@@ -23,10 +22,10 @@ while K ~= 6
             end;
             ids_mk = initDerivate(matrice_pk, 0);
             matrice_mk = ids_to_coord_mk(ids_pk, ids_mk);  %on recupère les coordonnées des mk
-            [courbe_bezier, courbe_focale] = tracer_courbe(matrice_pk, matrice_mk, resolution, degre); %et on peut tracer
+            [courbe_bezier, courbe_focale, courbure] = tracer_courbe(matrice_pk, matrice_mk, resolution, degre); %et on peut tracer
             delete(current_plot);
             if (choice == 1)
-                current_plot = plot(courbe_bezier(1, :), courbe_bezier(2, :), 'r', courbe_focale(1, :), courbe_focale(2, :), 'b'); %la courbe de Bézier
+                current_plot = plot(courbe_bezier(1, :), courbe_bezier(2, :), 'r', courbe_focale(1, :), courbe_focale(2, :), 'b', linspace(min(matrice_pk(1, :)), max(matrice_pk(2, :)), length(courbure)), courbure, 'g'); %la courbe de Bézier
             else
                 current_plot = plot(courbe_bezier(1, :), courbe_bezier(2, :), 'r');
             end;
@@ -78,13 +77,13 @@ while K ~= 6
             end;
 
             matrice_mk = ids_to_coord_mk(ids_pk, ids_mk);  %on recupère les coordonnées des mk
-            [courbe_bezier, courbe_focale] = tracer_courbe(matrice_pk, matrice_mk, resolution, degre); %et on peut tracer
+            [courbe_bezier, courbe_focale, courbure] = tracer_courbe(matrice_pk, matrice_mk, resolution, degre); %et on peut tracer
             current_plot = plot(courbe_bezier(1, :), courbe_bezier(2, :), 'r');
 
             choice = menu('Tracé de la courbe focale?', 'Oui', 'Non');
             if (choice == 1)
                 delete(current_plot);
-                current_plot = plot(courbe_bezier(1, :), courbe_bezier(2, :), 'r', courbe_focale(1, :), courbe_focale(2, :), 'b'); %la courbe de Bézier
+                current_plot = plot(courbe_bezier(1, :), courbe_bezier(2, :), 'r', courbe_focale(1, :), courbe_focale(2, :), 'b', linspace(min(matrice_pk(1, :)), max(matrice_pk(2, :)), length(courbure)), courbure, 'g'); %la courbe de Bézier
             else
                 choice = 0;
             end;
@@ -122,10 +121,10 @@ function update(pos)
         matrice_pk = ids_to_coord(ids_pk);
         if (K ~= 5)
             matrice_mk = ids_to_coord_mk(ids_pk, ids_mk);
-            [courbe_bezier, courbe_focale] = tracer_courbe(matrice_pk, matrice_mk, resolution, degre);
+            [courbe_bezier, courbe_focale, courbure] = tracer_courbe(matrice_pk, matrice_mk, resolution, degre);
             delete(current_plot);
             if (choice == 1)
-                current_plot = plot(courbe_bezier(1, :), courbe_bezier(2, :), 'r', courbe_focale(1, :), courbe_focale(2, :), 'b'); %la courbe de Bézier
+                current_plot = plot(courbe_bezier(1, :), courbe_bezier(2, :), 'r', courbe_focale(1, :), courbe_focale(2, :), 'b', linspace(min(matrice_pk(1, :)), max(matrice_pk(2, :)), length(courbure)), courbure, 'g');
             else
                 current_plot = plot(courbe_bezier(1, :), courbe_bezier(2, :), 'r');
             end;

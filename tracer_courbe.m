@@ -1,6 +1,6 @@
-function[courbe_bezier, courbe_focale] = tracer_courbe(matrice_pk, matrice_mk, resolution, degre)
+function[courbe_bezier, courbe_focale, courbure] = tracer_courbe(matrice_pk, matrice_mk, resolution, degre)
        %il faut diviser l'intervalle 1:resolution en k-sous-intervalle
-   alpha = 0.2;
+   alpha = 0.05;
    %longueur d'un sous-intervalle
    long_k = floor(resolution/length(matrice_pk));
    for k = 1:(length(matrice_pk) - 1)
@@ -27,3 +27,4 @@ function[courbe_bezier, courbe_focale] = tracer_courbe(matrice_pk, matrice_mk, r
            courbe_focale(:, (k-1)*long_k + t) = courbe_bezier(:, (k - 1)*long_k + t) + alpha*courbure((k - 1)*long_k + t) * n;
        end;
    end;
+   courbure = 0.005*courbure;
